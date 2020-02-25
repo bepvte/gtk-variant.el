@@ -2,8 +2,8 @@
 
 ;; Author: Paul Oppenheimer
 ;; Maintainer: Paul Oppenheimer
-;; Version: 1.0.0
-;; Package-Requires: ((emacs "25.1") seq)
+;; Version: 1.0.1
+;; Package-Requires: ((emacs "25.1"))
 ;; Homepage: https://github.com/bepve/gtk-variant
 ;; Keywords: frames,  GTK, titlebar
 
@@ -38,7 +38,6 @@
 
 
 ;;; Code:
-(require 'seq)
 (defvar gtk-variant 'dark
   "Initial GTK theme variant. Valid values are dark and light.")
 
@@ -55,11 +54,12 @@ Recommended usage:
   (interactive
    (list nil (intern (completing-read "GTK Variant: " '(dark light) nil t))))
   (when (display-graphic-p (or frame (selected-frame)))
-    (unless (seq-contains-p '(dark light) variant) (error "Invalid variant: %s" variant))
-    (let ((frame-id (frame-parameter frame 'outer-window-id)))
+    (let ((variant (or variant gtk-variant)))
+      (unless (memq variant '(dark light)) (error "Invalid variant: %s" variant))
       (call-process-shell-command
-       (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%s\" -id \"%s\""
-               variant frame-id) nil 0))))
+       (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%S\" -id \"%S\""
+               variant (frame-parameter frame 'outer-window-id))
+       nil 0))))
 
 
 (provide 'gtk-variant)
