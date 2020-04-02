@@ -1,8 +1,8 @@
-;;; gtk-variant.el --- Set the GTK theme variant \(titlebar color) -*- lexical-binding: t -*-
+;;; gtk-variant.el --- Set the GTK theme variant (titlebar color) -*- lexical-binding: t -*-
 
 ;; Author: Paul Oppenheimer
 ;; Maintainer: Paul Oppenheimer
-;; Version: 1.0.1
+;; Version: 1.0.2
 ;; Package-Requires: ((emacs "25.1"))
 ;; Homepage: https://github.com/bepve/gtk-variant
 ;; Keywords: frames,  GTK, titlebar
@@ -58,7 +58,8 @@ Recommended usage:
       (unless (memq variant '(dark light)) (error "Invalid variant: %s" variant))
       (call-process-shell-command
        (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%S\" -id \"%S\""
-               variant (frame-parameter frame 'outer-window-id))
+               (shell-quote-argument variant)
+               (shell-quote-argument (frame-parameter frame 'outer-window-id)))
        nil 0))))
 
 
