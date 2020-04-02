@@ -2,7 +2,7 @@
 
 ;; Author: Paul Oppenheimer
 ;; Maintainer: Paul Oppenheimer
-;; Version: 1.0.2
+;; Version: 1.0.3
 ;; Package-Requires: ((emacs "25.1"))
 ;; Homepage: https://github.com/bepve/gtk-variant
 ;; Keywords: frames,  GTK, titlebar
@@ -57,8 +57,8 @@ Recommended usage:
     (let ((variant (or variant gtk-variant)))
       (unless (memq variant '(dark light)) (error "Invalid variant: %s" variant))
       (call-process-shell-command
-       (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%S\" -id \"%S\""
-               (shell-quote-argument variant)
+       (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%s\" -id \"%s\""
+               (shell-quote-argument (symbol-name variant))
                (shell-quote-argument (frame-parameter frame 'outer-window-id)))
        nil 0))))
 
