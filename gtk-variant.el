@@ -29,7 +29,7 @@
 ;; This plugin uses the xprop command to set an X11 property that some window
 ;; managers use to set the GTK decorations. This allows for a dark titlebar,
 ;; which this plugin sets by default.
-;; This plugin will stop working on GNOME wayland if Emacs ever moves to wayland.
+;; This plugin will stop working on wayland if Emacs ever moves to wayland.
 
 ;;; Usage:
 
@@ -38,8 +38,14 @@
 
 
 ;;; Code:
-(defvar gtk-variant 'dark
-  "Initial GTK theme variant. Valid values are dark and light.")
+(defcustom gtk-variant 'dark
+  "Initial GTK theme variant. Valid values are dark and light."
+  :type '(radio (const dark)
+                (const light))
+  :set (lambda (_ val)
+         (setq gtk-variant val)
+         (gtk-variant-set-frame nil val))
+  :initialize #'custom-initialize-default)
 
 ;;;###autoload
 (defun gtk-variant-set-frame (&optional frame variant)
