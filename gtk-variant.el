@@ -29,7 +29,7 @@
 ;; This plugin uses the xprop command to set an X11 property that some window
 ;; managers use to set the GTK decorations. This allows for a dark titlebar,
 ;; which this plugin sets by default.
-;; This plugin will stop working on GNOME wayland if Emacs ever moves to wayland.
+;; This plugin will stop working on wayland if Emacs ever moves to wayland.
 
 ;;; Usage:
 
@@ -38,8 +38,14 @@
 
 
 ;;; Code:
-(defvar gtk-variant 'dark
-  "Initial GTK theme variant. Valid values are dark and light.")
+(defcustom gtk-variant 'dark
+  "Initial GTK theme variant. Valid values are dark and light."
+  :type '(radio (const dark)
+                (const light))
+  :set (lambda (_ val)
+         (setq gtk-variant val)
+         (gtk-variant-set-frame nil val))
+  :initialize #'custom-initialize-default)
 
 ;;;###autoload
 (defun gtk-variant-set-frame (&optional frame variant)
@@ -53,14 +59,20 @@ Recommended usage:
 \(fn &optional FRAME VARIANT)"
   (interactive
    (list nil (intern (completing-read "GTK Variant: " '(dark light) nil t))))
-  (when (display-graphic-p (or frame (selected-frame)))
-    (let ((variant (or variant gtk-variant)))
-      (unless (memq variant '(dark light)) (error "Invalid variant: %s" variant))
-      (call-process-shell-command
-       (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%s\" -id \"%s\""
-               (shell-quote-argument (symbol-name variant))
-               (shell-quote-argument (frame-parameter frame 'outer-window-id)))
-       nil 0))))
+  (if (display-graphic-p (or frame (selected-frame)))
+      (let ((variant (or variant gtk-variant)))
+        (unless (memq variant '(dark light)) (error "Invalid variant: %s" variant))
+        (with-temp-buffer
+          (call-process-shell-command
+           (format "xprop -f _GTK_THEME_VARIANT 8u -set _GTK_THEME_VARIANT \"%s\" -id \"%s\""
+                   (shell-quote-argument (symbol-name variant))
+                   (shell-quote-argument (frame-parameter frame 'outer-window-id)))
+           nil '(t t))
+          (when (> (point-max) 2)       ; one for eol one for ????
+            (goto-char (point-max))
+            (delete-char 1)         ; getting rid of newline
+            (message "output of gtk-variant: %s" (buffer-string)))))
+    (user-error "Not a graphical frame")))
 
 
 (provide 'gtk-variant)
